@@ -1,10 +1,8 @@
 # solar-system-recognition
 # 🌍 Simple Web Page with GitHub Pages
 
-This is a basic HTML project hosted using **GitHub Pages**. It was created to test and explore how static websites can be published directly from a GitHub repository.
-
 ### 🔗 Live Site
-👉 [Visit the Website](https://<your-username>.github.io/<repository-name>/)
+👉 [Visit the Website](https://nawafai-1.github.io/solar-system-recognition/)
 
 ---
 
@@ -22,4 +20,4 @@ This is a basic HTML project hosted using **GitHub Pages**. It was created to te
 
 ---
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by [Nawaf Barebood]
