@@ -1,6 +1,6 @@
 # solar-system-recognition
 
-# 🧠 AI Image Classifier - Arabic Web App (Teachable Machine)
+# 🧠 AI Image Classifier - in (Teachable Machine)
 
 Welcome to a smart and intuitive web application powered by **Teachable Machine** and **TensorFlow.js** — This project allows users to analyze images either through a webcam or direct upload and get instant, AI-driven classification results.
 
