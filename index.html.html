@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تيتشبل ماشين: تحليل الصور</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            direction: rtl; /* Right-to-left for Arabic */
+            text-align: right;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header {
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header p {
+            font-size: 1.1em;
+            color: #7f8c8d;
+        }
+        .webcam-section, .upload-section {
+            background-color: #fdfdfd;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .webcam-section h2, .upload-section h2 {
+            color: #34495e;
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        button {
+            background-color: #4CAF50; /* A pleasant green */
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        #webcam-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 200px;
+            height: 200px;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: #eee;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        #webcam-container canvas {
+            display: block;
+        }
+        #label-container {
+            margin-top: 25px;
+            background-color: #e8f5e9; /* Light green for results */
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            min-height: 80px; /* Ensure some height even if empty */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        #label-container div {
+            font-size: 1.2em;
+            color: #28a745; /* Darker green for predictions */
+            padding: 8px 0;
+            border-bottom: 1px dashed #c8e6c9;
+            width: 100%;
+            text-align: center;
+        }
+        #label-container div:last-child {
+            border-bottom: none;
+        }
+        .file-upload-wrapper {
+            margin-top: 20px;
+            border: 2px dashed #a0d3e8;
+            border-radius: 8px;
+            padding: 30px;
+            cursor: pointer;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px;
+            background-color: #ecf7ff;
+        }
+        .file-upload-wrapper:hover {
+            border-color: #5bbad5;
+            background-color: #e0f2ff;
+        }
+        .file-upload-wrapper input[type="file"] {
+            display: none;
+        }
+        .file-upload-wrapper label {
+            font-size: 1.2em;
+            color: #5bbad5;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .file-upload-wrapper img {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: none; /* Hidden by default */
+        }
+        .file-upload-wrapper .icon {
+            font-size: 3em;
+            color: #5bbad5;
+            margin-bottom: 10px;
+        }
+        .note {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            background-color: #f8f9fa;
+            border-left: 5px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: right;
+        }
+        .model-status {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #555;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+            direction: ltr; /* Keep LTR for the URL */
+        }
+        .model-status a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .model-status a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+                width: 95%;
+            }
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .header p {
+                font-size: 0.9em;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+            #label-container div {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>أهلاً بك في محلل الصور المدعوم بالذكاء الاصطناعي</h1>
+            <p>قم بتحميل صورة أو استخدم كاميرا الويب لاكتشاف المحتوى وتحليل نسبة التشابه.</p>
+        </div>
+
+        <div class="webcam-section">
+            <h2>تحليل عبر كاميرا الويب</h2>
+            <button type="button" onclick="initWebcam()">بدء تحليل كاميرا الويب</button>
+            <div id="webcam-container"></div>
+        </div>
+
+        <div class="upload-section">
+            <h2>تحليل عبر رفع صورة</h2>
+            <div class="file-upload-wrapper" id="fileUploadArea">
+                <input type="file" id="imageUpload" accept="image/*">
+                <span class="icon">&#x1F4C4;</span> <label for="imageUpload">انقر هنا لرفع صورة أو اسحبها وأفلتها</label>
+                <img id="uploadedImage" src="#" alt="الصورة المرفوعة" style="display:none;">
+            </div>
+            <button type="button" onclick="predictUploadedImage()" id="predictUploadBtn" style="display:none;">تحليل الصورة المرفوعة</button>
+        </div>
+
+        <div id="label-container">
+            <p>النتائج ستظهر هنا بعد التحليل...</p>
+        </div>
+
+        <div class="model-status">
+            <p>الموديل المستخدم: <a href="https://teachablemachine.withgoogle.com/models/Uqzok8kFX/" target="_blank">Teachable Machine Image Model</a></p>
+        </div>
+
+        <div class="note">
+            <p>ملاحظة: للحصول على أفضل النتائج، يرجى التأكد من أن الصورة واضحة وجيدة الإضاءة.</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        // The link to your model provided by Teachable Machine export panel
+        const URL = "https://teachablemachine.withgoogle.com/models/Uqzok8kFX/"; // Use the provided hosted URL directly
+
+        let model, webcam, labelContainer, maxPredictions;
+        let isWebcamActive = false; // Flag to track webcam state
+
+        // Load the image model
+        async function loadModel() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+            try {
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+                console.log("Model loaded successfully!");
+                // Clear initial message in labelContainer
+                labelContainer.innerHTML = '';
+                for (let i = 0; i < maxPredictions; i++) { // and class labels
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+            } catch (error) {
+                console.error("Failed to load model:", error);
+                labelContainer.innerHTML = `<p style="color: red;">فشل في تحميل الموديل. يرجى التحقق من الرابط.</p>`;
+            }
+        }
+
+        // Initialize webcam setup
+        async function initWebcam() {
+            if (isWebcamActive) {
+                // If webcam is already active, stop it
+                if (webcam) {
+                    webcam.stop();
+                    document.getElementById("webcam-container").innerHTML = ''; // Clear canvas
+                }
+                document.querySelector(".webcam-section button").textContent = "بدء تحليل كاميرا الويب";
+                isWebcamActive = false;
+                // Clear previous predictions
+                labelContainer.innerHTML = '';
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+                return;
+            }
+
+            try {
+                // Convenience function to setup a webcam
+                const flip = true; // whether to flip the webcam
+                webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+                await webcam.setup(); // request access to the webcam
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                // append elements to the DOM
+                document.getElementById("webcam-container").innerHTML = ''; // Clear previous content
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                document.querySelector(".webcam-section button").textContent = "إيقاف كاميرا الويب";
+                isWebcamActive = true;
+                // Clear previous predictions and prepare for new ones
+                labelContainer.innerHTML = '';
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+            } catch (error) {
+                console.error("Failed to setup webcam:", error);
+                alert("لم نتمكن من الوصول إلى كاميرا الويب. يرجى التأكد من السماح بالوصول.");
+            }
+        }
+
+        async function loop() {
+            if (webcam && isWebcamActive) {
+                webcam.update(); // update the webcam frame
+                await predict(webcam.canvas);
+                window.requestAnimationFrame(loop);
+            }
+        }
+
+        // Run the image through the image model
+        async function predict(imageElement) {
+            if (!model) {
+                console.error("Model not loaded yet.");
+                return;
+            }
+            try {
+                const prediction = await model.predict(imageElement);
+                labelContainer.innerHTML = ''; // Clear previous labels
+                for (let i = 0; i < maxPredictions; i++) {
+                    const classPrediction =
+                        prediction[i].className + ": " + (prediction[i].probability * 100).toFixed(2) + "%";
+                    const div = document.createElement("div");
+                    div.innerHTML = classPrediction;
+                    labelContainer.appendChild(div);
+                }
+            } catch (error) {
+                console.error("Error during prediction:", error);
+                labelContainer.innerHTML = `<p style="color: red;">حدث خطأ أثناء التحليل. يرجى المحاولة مرة أخرى.</p>`;
+            }
+        }
+
+        // --- File Upload Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            labelContainer = document.getElementById("label-container");
+            loadModel(); // Load the model when the page loads
+
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const imageUpload = document.getElementById('imageUpload');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const predictUploadBtn = document.getElementById('predictUploadBtn');
+            let currentUploadedFile = null;
+
+            // Handle file input change
+            imageUpload.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    currentUploadedFile = file;
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImage.src = e.target.result;
+                        uploadedImage.style.display = 'block'; // Show the image
+                        // Hide the icon and text
+                        fileUploadArea.querySelector('.icon').style.display = 'none';
+                        fileUploadArea.querySelector('label').style.display = 'none';
+                        predictUploadBtn.style.display = 'block'; // Show predict button
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    uploadedImage.style.display = 'none';
+                    uploadedImage.src = '#';
+                    fileUploadArea.querySelector('.icon').style.display = 'block';
+                    fileUploadArea.querySelector('label').style.display = 'block';
+                    predictUploadBtn.style.display = 'none';
+                    currentUploadedFile = null;
+                }
+            });
+
+            // Handle drag and drop
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.style.borderColor = '#5bbad5';
+                fileUploadArea.style.backgroundColor = '#e0f2ff';
+            });
+
+            fileUploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                fileUploadArea.style.borderColor = '#a0d3e8';
+                fileUploadArea.style.backgroundColor = '#ecf7ff';
+            });
+
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.style.borderColor = '#a0d3e8';
+                fileUploadArea.style.backgroundColor = '#ecf7ff';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    imageUpload.files = files; // Assign dropped files to input
+                    imageUpload.dispatchEvent(new Event('change')); // Trigger change event
+                }
+            });
+
+            // Function to predict uploaded image
+            window.predictUploadedImage = async function() {
+                if (uploadedImage.src && uploadedImage.style.display === 'block') {
+                    // Stop webcam if active
+                    if (isWebcamActive) {
+                        initWebcam(); // This will stop the webcam and reset button
+                    }
+                    await predict(uploadedImage);
+                } else {
+                    alert("الرجاء رفع صورة أولاً.");
+                }
+            };
+        });
+    </script>
+</body>
+</html>
